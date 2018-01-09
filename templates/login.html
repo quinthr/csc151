@@ -1,0 +1,113 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width = device-width, initial-scale = 1">
+<title>Login</title>
+
+<!-- Use downloaded version of Bootstrap. You can style everything here to your liking. -->
+<!-- Download the Bootstrap source code here
+http://getbootstrap.com/getting-started/ -->
+<link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
+
+<style type="text/css">
+body {
+  font-size: 62.5%;
+  font-family: arial, sans-serif;
+}
+#nttLogo{
+  height: 100px;
+  width: 100px;
+}
+#websiteTitle{
+  font-size: 10em;
+  vertical-align: middle;
+  font-family: 'Pacifico', cursive;
+  padding-left: 15px;
+  color: #191970;
+}
+#websiteSlogan{
+  font-size: 5.4em;
+}
+/* Carousel Styling */
+.slide1{
+  background-image: url('../static/img/bkgrnd9.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.slide2{
+  background-image: url('../static/img/bkgrnd1.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.slide3{
+  background-image: url('../static/img/bkgrnd3.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.carousel-caption h1{
+  font-size: 5.4em;
+  font-family: 'Pacifico', cursive;
+  padding-bottom: .4em;
+}
+.carousel-caption p{
+  font-size: 2em;
+}
+.carousel-caption{
+  position: absolute;
+  bottom: 50%;
+}
+.form-group{
+    font-size: 3em;
+}
+</style>
+</head>
+<body>
+<!--
+<div class="container">
+  <div class="jumbotron">
+  <img src="ntt-logo.png" id="nttLogo" alt="New Think Tank Logo">
+  <span id="websiteTitle">New Think Tank</span>
+  <p id="websiteSlogan">Video Tutorials on just about Anything</p>
+  </div>
+</div>
+-->
+
+<!-- Carousel -->
+<!-- Surround everything with a div with the class carousel slide -->
+  <!-- Define the text to place over the image -->
+  <div class="carousel-inner">
+    <div class="item active" >
+    <div class ="slide1"></div>
+    <div class="carousel-caption">
+        <h1><a href="{{url_for('main')}}">Student Management</a></h1>
+      <div class="form-group">
+          <form action="/login" method="POST">
+            <label for="username">Username</label>
+            <input type="text" placeholder="" class="form-control" id="username" placeholder="Your username" name="username" />
+      </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" placeholder="" class="form-control" id="password" placeholder="Your password" name="password" />
+        </div>
+        <div class="btn-group-vertical btn-block text-center" role="group">
+            <button class="btn btn-primary btn-lg">Login Now</button>
+        </div>
+         </form>
+        <p>Not yet a member? Click <a href="{{url_for('signup')}}">here</a></p>
+    </div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+<!-- Use downloaded version of Bootstrap -->
+<script src="../static/js/jquery.min.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+</body>
+</html>

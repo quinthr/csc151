@@ -1,0 +1,41 @@
+.title{
+    position: absolute;
+    transform: scale(0.60);
+    top:-10px;
+    }
+    .right{
+    margin-right: 6%;
+    }
+    .breadcrumb-item{
+        color:#337ab7;
+    }
+    .marginicon{
+        color:#337ab7;
+    }
+    .addaexam{
+        margin-top: 20px;
+    }
+    .question-size{
+        font-size: 20px;
+    }
+    .question-size > li > a{
+        font-size: 16px;
+        margin-left: 10px;
+    }
+    .form-control{
+        text-align: center;
+    }
+    .card-button{
+    margin-top:0;
+    position: absolute;
+    top: -5px;
+    right: 5px;
+    }
+    #discussion{
+        height: 250px;
+        border: 0.5px solid !important;
+        margin-bottom: 5px;
+    }
+    .bordered highlight{
+        width:100%;
+    }

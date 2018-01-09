@@ -1,0 +1,133 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width = device-width, initial-scale = 1">
+<title>Student Management</title>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
+
+<style type="text/css">
+body {
+  font-size: 62.5%;
+  font-family: arial, sans-serif;
+}
+#nttLogo{
+  height: 100px;
+  width: 100px;
+}
+#websiteTitle{
+  font-size: 10em;
+  vertical-align: middle;
+  font-family: 'Pacifico', cursive;
+  padding-left: 15px;
+  color: #191970;
+}
+#websiteSlogan{
+  font-size: 5.4em;
+}
+/* Carousel Styling */
+.slide1{
+  background-image: url('../static/img/bkgrnd1.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.slide2{
+  background-image: url('../static/img/bkgrnd2.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.slide3{
+  background-image: url('../static/img/bkgrnd3.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.carousel-caption h1{
+  font-size: 5.4em;
+  font-family: 'Pacifico', cursive;
+  padding-bottom: .4em;
+}
+.carousel-caption p{
+  font-size: 2em;
+}
+.carousel-caption{
+  position: absolute;
+  bottom: 50%;
+}
+</style>
+</head>
+<body>
+<!--
+<div class="container">
+  <div class="jumbotron">
+  <img src="ntt-logo.png" id="nttLogo" alt="New Think Tank Logo">
+  <span id="websiteTitle">New Think Tank</span>
+  <p id="websiteSlogan">Video Tutorials on just about Anything</p>
+  </div>
+</div>
+-->
+
+<!-- Carousel -->
+<!-- Surround everything with a div with the class carousel slide -->
+<div id="theCarousel" class="carousel slide" data-ride="carousel">
+
+  <!-- Define how many slides to put in the carousel -->
+  <ol class="carousel-indicators">
+    <li data-target="#theCarousel" data-slide-to="0" class="active"> </li >
+    <li data-target="#theCarousel" data-slide-to="1"> </li>
+    <li data-target ="#theCarousel" data-slide-to="2"> </li>
+  </ol >
+
+  <!-- Define the text to place over the image -->
+  <div class="carousel-inner">
+    <div class="item active" >
+    <div class ="slide1"></div>
+    <div class="carousel-caption">
+      <h1>Student Management</h1>
+      <h2>Join now!</h2>
+        <p><a href="{{ url_for('signup')}}" class="btn btn-primary btn-lg">Sign Up</a></p>
+        <p>Already a member? Click <a href="{{url_for('login')}}">here</a></p>
+    </div>
+  </div>
+  <div class="item">
+  <div class="slide2"></div>
+  <div class="carousel-caption">
+    <h1>Student Management</h1>
+    <h2>Already a member?</h2>
+      <p><a href="{{ url_for('login')}}" class="btn btn-primary btn-lg">Log in</a></p>
+      <p>Not yet a member? Click <a href="{{ url_for('signup')}}">here</a></p>
+  </div>
+
+  </div>
+  <div class="item">
+  <div class="slide3"></div>
+  <div class="carousel-caption">
+  <h1>Manage your students</h1>
+  <p>And it's easy!</p>
+  </div>
+  </div>
+  </div>
+
+  <!-- Set the actions to take when the arrows are clicked -->
+  <a class="left carousel-control" href="#theCarousel" data-slide="prev">
+  <span class="glyphicon glyphicon-chevron-left"> </span>
+  </a>
+  <a class="right carousel-control" href="#theCarousel" data-slide="next">
+  <span class="glyphicon glyphicon-chevron-right"></span>
+  </a>
+  </div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+<!-- Use downloaded version of Bootstrap -->
+<script src="../static/js/jquery.min.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+</body>
+</html>

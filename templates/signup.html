@@ -1,0 +1,233 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width = device-width, initial-scale = 1">
+<title>Sign Up</title>
+
+<!-- Use downloaded version of Bootstrap. You can style everything here to your liking. -->
+<!-- Download the Bootstrap source code here
+http://getbootstrap.com/getting-started/ -->
+<link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
+
+<style type="text/css">
+body {
+  font-size: 62.5%;
+  font-family: arial, sans-serif;
+}
+#nttLogo{
+  height: 100px;
+  width: 100px;
+}
+#websiteTitle{
+  font-size: 10em;
+  vertical-align: middle;
+  font-family: 'Pacifico', cursive;
+  padding-left: 15px;
+  color: #191970;
+}
+#websiteSlogan{
+  font-size: 5.4em;
+}
+/* Carousel Styling */
+.slide1{
+  background-image: url('../static/img/bkgrnd8.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.slide2{
+  background-image: url('../static/img/bkgrnd1.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.slide3{
+  background-image: url('../static/img/bkgrnd3.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.carousel-caption h1{
+  font-size: 5.4em;
+  font-family: 'Pacifico', cursive;
+  padding-bottom: .4em;
+}
+.carousel-caption p{
+  font-size: 2em;
+}
+.carousel-caption{
+  position: absolute;
+  bottom: 45%;
+}
+.signup-container{
+    font-size:3em;
+}
+#signup{
+    background: #7a7a79;
+    padding: 10px;
+    border-radius: 20px;
+    opacity: 0.85;
+}
+.maincontainer{
+}
+.maincontainer2{
+    margin-left:1%;
+}
+.btnsubmit{
+    width:100%;
+    position: absolute;
+    right: 0%;
+    bottom: 0%;
+}
+</style>
+</head>
+<body>
+  <!-- Define the text to place over the image -->
+  <div class="carousel-inner">
+    <div class="item active" >
+    <div class ="slide1"></div>
+    <div class="carousel-caption">
+        <h1><a href="{{url_for('main')}}">Student Management</a></h1>
+      <div id="signup">
+          <h2>Sign Up</h2>
+          <form action="/signup" method="POST">
+              <table style="color: white;" class="table signup-container">
+                  <th class="maincontainer">
+                  <div class="container1">
+                      <div class="pull-left">
+                          <div class="field-wrap">
+                              <label>
+                                  First Name<span class="req"></span>
+                              </label>
+                              <input style="color:black;" type="text" placeholder="First Name" name="firstname" required autocomplete="off" />
+                          </div>
+                  </div>
+                      <div class="pull-right">
+                          <div class="field-wrap">
+                              <label>
+                                  Last Name<span class="req"></span>
+                              </label>
+                              <input style="color:black;" type="text" placeholder="Last Name" name="lastname" required autocomplete="off" />
+                              </div>
+                          </div>
+                  </div>
+                  <div class="container2">
+                      <div class="pull-left">
+                          <div class="field-wrap">
+                              <label>
+                                  Middle Name<span class="req"></span>
+                              </label>
+                              <input style="color:black;" type="text" placeholder="Middle Name" name="middlename" required autocomplete="off" />
+                          </div>
+                      </div>
+                      <div class="pull-right">
+                          <div class="field-wrap">
+                              <label>
+                                  Birth Date<span class="req"></span>
+                              </label>
+                              <input style="color:black;" type="text" placeholder="YYYY-MM-DD" name="birthdate" required autocomplete="off" />
+                          </div>
+                      </div>
+                  </div>
+                  <div class="container3">
+                      <div class="pull-left">
+                          <div class="field-wrap">
+                                  Sex<span class="req"></span>
+                                  <label><input type="radio" name="sex" value="Male"> Male</label>
+                                  <label><input type="radio" name="sex" value="Female"> Female</label>
+                          </div>
+                      </div>
+                      <div class="pull-right">
+                          <div class="field-wrap">
+                              <label>
+                                  Address<span class="req"></span>
+                              </label>
+                              <input style="color:black;" type="text" placeholder="Street/Village, Barangay, City" name="address" required autocomplete="off" />
+                            </div>
+                      </div>
+                      <div class="container4">
+                          <div class="pull-left">
+                              <div class="field-wrap">
+                                  <label>
+                                      Stundent ID<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="text" placeholder="YYYY-XXXX" name="studentId" required autocomplete="off" />
+                              </div>
+                          </div>
+                          <div class="pull-right">
+                              <div class="field-wrap">
+                                      <label>
+                                          Course<span class="req"></span>
+                                      </label>
+                                      <input style="color:black;" type="text" placeholder="Course" name="course" required autocomplete="off" />
+                              </div>
+                          </div>
+                      </div>
+                      <div class="pull-left">
+                          <div class="field-wrap">
+                              <label for="college" class="pull-left collegename">
+                                      College<span class="req"></span>
+                              </label>
+                                  <select class="form-control pull-right" id="college" name=college>
+                                    <option value="" disabled selected>Select your college...</option>
+                                      <option value="CBAA">CBAA</option>
+                                      <option value="CED">CED</option>
+                                      <option value="COET">COET</option>
+                                      <option value="CON">CON</option>
+                                      <option value="CSM">CSM</option>
+                                      <option value="SCS">SCS</option>
+                                  </select>
+                          </div>
+                      </div>
+                  </div>
+                      <th class="maincontainer2">
+                          <div class="container6">
+                              <div class="field-wrap">
+                                  <label>
+                                      Username<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="text" placeholder="Username" name="username" required autocomplete="off" />
+                              </div>
+
+                              <div class="field-wrap">
+                                  <label>
+                                      Email Address<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="email" placeholder="Email" name="email" required autocomplete="off" />
+                              </div>
+
+                              <div class="field-wrap">
+                                  <label>
+                                      Password<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="password" placeholder="Password" name="password" required autocomplete="off" />
+                              </div>
+                              <div class="field-wrap">
+                                  <label>
+                                      Confirm<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="password" placeholder="Confirm Password" name="password2" required autocomplete="off" />
+                              </div>
+                          </div>
+                    </th>
+                  <p>Already a member? Click <a href="{{ url_for('login')}}">here</a></p>
+                  <button type="submit" class="btnsubmit btn btn-primary btn-lg pull-right" />Get Started</button>
+              </table>
+          </form>
+      </div>
+
+    </div>
+  </div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+
+<!-- Use downloaded version of Bootstrap -->
+<script src="../static/js/jquery.min.js"></script>
+<script src="../static/js/bootstrap.min.js"></script>
+</body>
+</html>
