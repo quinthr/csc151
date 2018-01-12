@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('.static', filename='css/bootstrap.min.css') }}">
+    <link type="text/css" rel="stylesheet prefetch" href="{{ url_for('.static', filename='css/materialize.min.css') }}">
+    <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+    <link type="text/css" rel="stylesheet" href="..static/css/style.css">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('.static', filename='css/styleadmin.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('.static', filename='css/adminstylenew.css')}}">
+<style>
+body{
+  background-color: #D6EAF8;
+  height: 1000px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.title{
+    font-size: 3em !important;
+    }
+
+.jumbotron{
+    height: 1650px;
+}
+</style>
+</head>
+<body>
+  <div class="navbar-fixed">
+  <nav>
+    <div class="nav-wrapper blue">
+      <ul>
+        <li><a href="#!" onclick="return hideshow();"><i class="material-icons">menu</i></a></li>
+          <li><h1 class="title">Student Management</h1></li>
+      </ul>
+      <ul class="right">
+          <li class="dropdown">
+            <a href="#" id=#signout class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                <i class="material-icons">arrow_drop_down</i>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ url_for('logout')}}">Log-out</a></li>
+            </ul>
+          </li>
+      </ul>
+    </div>
+  </nav>
+</div>
+<div class="brown hide" style="height: 200px;"></div>
+<ul id="hidemenu" class="side-nav fixed transparent z-depth-0">
+    <li><a href="{{url_for('profile', user=user)}}"><i class="material-icons">person</i>{{user}}</a></li>
+    <li class="active"><a href="{{ url_for('userdashboard', user=user) }}"><i class="material-icons blue-text text-darken-1">dashboard</i>Dashboard</a></li>
+  <li><div class="divider"></div></li>
+  <li><a href="{{url_for('enrolledCourses', user=user)}}"><i class="material-icons">school</i>My Courses</a></li>
+    <li><a href="#"><i class="material-icons">person</i>Users</a></li>
+</ul>
+
+<div class="main">
+  <div class="container-fluid">
+    <div class="row">
+        <nav class="breadcrumb">
+          <a class="breadcrumb-item" href="{{ url_for('userdashboard', user=user) }}">Home</a>
+            <span><span class="glyphicon glyphicon-menu-right marginicon"></span></span>
+          <a class="breadcrumb-item active">{{user}}</a>
+        </nav>
+        <h2 class="margin">Edit Course</h2>
+        <div class="jumbotron">
+            <div class="control-group">
+                 <form id="editForm" action="{{ url_for('editinfo', user=mainuser[0]) }}" method="POST" novalidate>
+                     <div class="form-group floating-label-form-group controls">
+                         <h4>Username</h4>
+                         <input type="text" class="form-control"  value="{{ mainuser[0] }}" name=username id=username>
+                         <br />
+                         <h4>Email</h4>
+                         <input type="email" class="form-control"  value="{{ mainuser[1] }}" name=email id=email>
+                         <br />
+                         <h4>First Name</h4>
+                         <input type="text" class="form-control"  value="{{ mainuser[2] }}" name=firstname id=firstname>
+                         <br />
+                         <h4>Middle Name</h4>
+                         <input type="text" class="form-control"  value="{{ mainuser[3] }}" name=middlename id=middlename>
+                         <br />
+                         <h4>Last Name</h4>
+                         <input type="text" class="form-control"  value="{{ mainuser[4] }}" name=lastname id=lastname>
+                         <br />
+                         <h4>Birthdate</h4>
+                         <input type="text" class="form-control"  value="{{ mainuser[6] }}" name=birthdate id=birthdate>
+                         <br />
+                         <h4>Stundent ID</h4>
+                         <input type="text" class="form-control"  value="{{ mainuser[8] }}" name=studentId id=studentId>
+                         <br />
+
+                         <br />
+                         <h4>Course</h4>
+                         <input type="text" class="form-control"  value="{{ mainuser[10] }}" name=course id=course>
+                         <br />
+                         <h4>Address</h4>
+                         <input type="text" class="form-control"  value="{{ mainuser[7] }}" name=address id=address>
+                         <br />
+                         <div class="field-wrap" style="margin-bottom: 2%;">
+                              <label for="college" style="color:black; margin-bottom: 2%;" class="pull-left collegename">
+                                      <h4>College<span class="req"></span></h4>
+                              </label>
+                                  <select style="margin-bottom: 2%;" class="form-control pull-right" id="college" name=college>
+                                    <option value="{{mainuser[9]}}" selected>{{mainuser[9]}}</option>
+                                      <option value="CBAA">CBAA</option>
+                                      <option value="CED">CED</option>
+                                      <option value="COET">COET</option>
+                                      <option value="CON">CON</option>
+                                      <option value="CSM">CSM</option>
+                                      <option value="SCS">SCS</option>
+                                  </select>
+                          </div>
+                     </div>
+                     <button type="submit" class="btn btn-info btn-med pull-right">
+                         Submit
+                     </button>
+            </div>
+    </div>
+    </div>
+  </div>
+</div>
+  <script src="{{ url_for('.static', filename='js/jquery.min.js')}}"></script>
+  <script src="{{ url_for('.static', filename='js/bootstrap.min.js')}}"></script>
+  <script src="{{ url_for('.static', filename='js/materialize.min.js')}}"></script>
+  <script>
+      function hideshow() {
+    var x = document.getElementById("hidemenu");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+  </script>
+  <!--
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js'></script>
+    -->
+
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('.static', filename='css/bootstrap.min.css') }}">
+    <link type="text/css" rel="stylesheet prefetch" href="{{ url_for('.static', filename='css/materialize.min.css') }}">
+    <link rel='stylesheet prefetch' href='https://fonts.googleapis.com/icon?family=Material+Icons'>
+    <link type="text/css" rel="stylesheet" href="..static/css/style.css">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('.static', filename='css/styleadmin.css') }}">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('.static', filename='css/adminstylenew.css')}}">
+    <style>
+body{
+  background-color: #D6EAF8;
+  height: 1000px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+.title{
+    font-size: 3em !important;
+    }
+</style>
+</head>
+<body>
+  <div class="navbar-fixed">
+  <nav>
+    <div class="nav-wrapper blue">
+      <ul>
+        <li><a href="#" onclick="return hideshow();"><i class="material-icons">menu</i></a></li>
+           <li><h1 class="title">Student Management</h1></li>
+      </ul>
+      <ul class="right">
+          <li class="dropdown">
+            <a href="#" id=#signout class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                <i class="material-icons">arrow_drop_down</i>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="{{ url_for('logout')}}">Log-out</a></li>
+            </ul>
+          </li>
+      </ul>
+    </div>
+  </nav>
+</div>
+<div class="brown hide" style="height: 200px;"></div>
+<ul id="hidemenu" class="side-nav fixed transparent z-depth-0">
+    <li><a><i class="material-icons">supervisor_account</i>Admin</a></li>
+    <li class="active"><a href="{{ url_for('admindashboard') }}"><i class="material-icons blue-text text-darken-1">dashboard</i>Dashboard</a></li>
+  <li><div class="divider"></div></li>
+  <li><a href="{{ url_for('managecourses') }}"><i class="material-icons">school</i>Manage Courses</a></li>
+    <li><a href="{{ url_for('manageUsers') }}"><i class="material-icons">person</i>Manage Users</a></li>
+</ul>
+
+<div class="main">
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="breadcrumb">
+                  <a class="breadcrumb-item" href="{{ url_for('admindashboard') }}">Home</a>
+                    <span><span class="glyphicon glyphicon-menu-right marginicon"></span></span>
+                  <a class="breadcrumb-item active">Manage Users</a>
+                </nav>
+                <div class="jumbotron">
+                <form action="{{url_for('addUser')}}" method="POST">
+                  <table style="color: white;" class="table signup-container">
+                      <th class="maincontainer">
+                      <div class="container1">
+                              <div class="field-wrap">
+                                  <label>
+                                      First Name<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="text" placeholder="First Name" name="firstname" required autocomplete="off" />
+                              </div>
+                          <div class="field-wrap">
+                                  <label>
+                                      Middle Name<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="text" placeholder="Middle Name" name="middlename" required autocomplete="off" />
+                          </div>
+                              <div class="field-wrap">
+                                  <label>
+                                      Last Name<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="text" placeholder="Last Name" name="lastname" required autocomplete="off" />
+                              </div>
+                      </div>
+                      <div class="container2">
+                              <div class="field-wrap">
+                                  <label>
+                                      Birth Date<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="text" placeholder="YYYY-MM-DD" name="birthdate" required autocomplete="off" />
+                          </div>
+                      </div>
+                      <div class="container3">
+                              <div class="field-wrap">
+                                  <div class="radio">
+                                      <label class="control-label input-group">Sex</label>
+                                        <div class="btn-group" data-toggle="buttons">
+                                            <label class="btn btn-default">
+                                                <input type="radio" name="sex" value="Male">Male
+                                            </label>
+                                            <label class="btn btn-default">
+                                                <input type="radio" name="sex" value="Female">Female
+                                            </label>
+                                        </div>
+                                      </div>
+                                  </div>
+                              </div>
+                              <div class="field-wrap">
+                                  <label>
+                                      Address<span class="req"></span>
+                                  </label>
+                                  <input style="color:black;" type="text" placeholder="Street/Village, Barangay, City" name="address" required autocomplete="off" />
+                                </div>
+                          <div class="container4">
+                                  <div class="field-wrap">
+                                      <label>
+                                          Stundent ID<span class="req"></span>
+                                      </label>
+                                      <input style="color:black;" type="text" placeholder="YYYY-XXXX" name="studentId" required autocomplete="off" />
+                              </div>
+                                  <div class="field-wrap">
+                                          <label>
+                                              Course<span class="req"></span>
+                                          </label>
+                                          <input style="color:black;" type="text" placeholder="Course" name="course" required autocomplete="off" />
+                                  </div>
+                          </div>
+                          <div class="pull-left">
+                              <div class="field-wrap">
+                                  <label for="college" class="pull-left collegename">
+                                          College<span class="req"></span>
+                                  </label>
+                                      <select class="form-control pull-right" id="college" name=college>
+                                        <option value="" disabled selected>Select your college...</option>
+                                          <option value="CBAA">CBAA</option>
+                                          <option value="CED">CED</option>
+                                          <option value="COET">COET</option>
+                                          <option value="CON">CON</option>
+                                          <option value="CSM">CSM</option>
+                                          <option value="SCS">SCS</option>
+                                      </select>
+                              </div>
+                          </div>
+                      </div>
+                          <th class="maincontainer2">
+                              <div class="container6">
+                                  <div class="field-wrap">
+                                      <label>
+                                          Username<span class="req"></span>
+                                      </label>
+                                      <input style="color:black;" type="text" placeholder="Username" name="username" required autocomplete="off" />
+                                  </div>
+
+                                  <div class="field-wrap">
+                                      <label>
+                                          Email Address<span class="req"></span>
+                                      </label>
+                                      <input style="color:black;" type="email" placeholder="Email" name="email" required autocomplete="off" />
+                                  </div>
+
+                                  <div class="field-wrap">
+                                      <label>
+                                          Password<span class="req"></span>
+                                      </label>
+                                      <input style="color:black;" type="password" placeholder="Password" name="password" required autocomplete="off" />
+                                  </div>
+                                  <div class="field-wrap">
+                                      <label>
+                                          Confirm<span class="req"></span>
+                                      </label>
+                                      <input style="color:black;" type="password" placeholder="Confirm Password" name="password2" required autocomplete="off" />
+                                  </div>
+                              </div>
+                        </th>
+                  </table>
+                    <button type="submit" class="btnsubmit btn btn-primary btn-lg pull-right" />Submit</button>
+              </form>
+                </div>
+            </div>
+        </div>
+    </div>
+  <script src="{{ url_for('.static', filename='js/jquery.min.js')}}"></script>
+  <script src="{{ url_for('.static', filename='js/bootstrap.min.js')}}"></script>
+  <script src="{{ url_for('.static', filename='js/materialize.min.js')}}"></script>
+  <script>
+      function hideshow() {
+    var x = document.getElementById("hidemenu");
+    if (x.style.display === "none") {
+        x.style.display = "block";
+    } else {
+        x.style.display = "none";
+    }
+    }
+  </script>
+  <!--
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js'></script>
+    -->
+
+</body>
+</html>
