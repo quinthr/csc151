@@ -67,10 +67,10 @@ margin-top: 8px;
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
                         <div class="control-group pull-left">
-                                    <form class="navbar-search pull-right" action="{{ url_for('addcourse', coursename=coursename) }}" method="POST">
+                                    <form class="navbar-search pull-right" action="{{ url_for('search', user=user, usertype='user') }}" method="POST">
                                          <div class="form-group floating-label-form-group controls pull-left">
                                              <div class="pull-left">
-                                                 <input type="text" class="form-control" placeholder="Search">
+                                                 <input type="text" name="input" class="form-control" placeholder="Search">
                                              </div>
                                              <div class="add-header pull-right search">
                                                 <button type="submit" name="search" id="search" class="btn btn-info btn-med pull-right">

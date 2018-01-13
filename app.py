@@ -17,30 +17,24 @@ theCursor = db_conn.cursor()
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-db_conn.execute("DROP TABLE IF EXISTS Admin")
-db_conn.execute("DROP TABLE IF EXISTS User")
-db_conn.execute("DROP TABLE IF EXISTS Course")
-db_conn.execute("DROP TABLE IF EXISTS Enrolled")
-db_conn.commit()
 
-db_conn.execute("""CREATE TABLE Admin(adminid INTEGER PRIMARY KEY AUTOINCREMENT, 
+db_conn.execute("""CREATE TABLE IF NOT EXISTS Admin(adminid INTEGER PRIMARY KEY AUTOINCREMENT, 
                 username STRING(50) NOT NULL,  password STRING(50) NOT NULL);""")
 
-db_conn.execute("""CREATE TABLE User(id INTEGER PRIMARY KEY AUTOINCREMENT, usertype STRING(20) NOT NULL,
+db_conn.execute("""CREATE TABLE IF NOT EXISTS User(id INTEGER PRIMARY KEY AUTOINCREMENT, usertype STRING(20) NOT NULL,
                 username VARCHAR(50) NOT NULL UNIQUE,  email VARCHAR(50) NOT NULL UNIQUE, 
                 password VARCHAR(50) NOT NULL, firstname NOT NULL, lastname NOT NULL, 
-                middlename NOT NULL, sex STRING(10) NOT NULL, birthdate TEXT NOT NULL, 
+                middlename NOT NULL, sex STRING(10) NOT NULL, birthdate TEXT NOT NULL,
                 studentId INT(10) NOT NULL UNIQUE, college STRING(30) NOT NULL, course STRING(10) NOT NULL,
                 address STRING(50) NOT NULL);""")
 
-db_conn.execute("""CREATE TABLE Course(courseid INTEGER PRIMARY KEY AUTOINCREMENT,
+db_conn.execute("""CREATE TABLE IF NOT EXISTS Course(courseid INTEGER PRIMARY KEY AUTOINCREMENT,
                 coursename STRING(50) UNIQUE NOT NULL);""")
 
-db_conn.execute("""CREATE TABLE Enrolled(enrollmentid INTEGER PRIMARY KEY AUTOINCREMENT,
+db_conn.execute("""CREATE TABLE IF NOT EXISTS Enrolled(enrollmentid INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER,  course_id INTEGER, FOREIGN KEY(user_id) REFERENCES User(id),   
                    FOREIGN KEY(course_id) REFERENCES Course(courseid) );""")
 
-print('Table Created')
 db_conn.commit()
 
 
@@ -109,6 +103,7 @@ def logout():
 def signup():
     if request.method == 'POST':
         if request.form['password'] == request.form['password2']:
+            birth_date = request.form['birthdate']
             db_conn.execute('INSERT INTO User(usertype, username, email, password, firstname, lastname, middlename, \
                             sex, birthdate, studentId, college, course, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', \
                             ['user', request.form['username'], request.form['email'], request.form['password'], request.form['firstname'], request.form['lastname'], \
@@ -193,23 +188,28 @@ def userAddcourse(user):
             usercourses = ()
             thisuser = theCursor.execute("SELECT id FROM User where username=?", (user,)).fetchone()
             coursefind = theCursor.execute("SELECT courseid FROM Course where coursename=?", (request.form.get('coursename1'),)).fetchone()
-            coursefind2 = theCursor.execute("SELECT coursename FROM Course where coursename=?", (request.form.get('coursename1'),)).fetchone()
-            verifycourse = theCursor.execute("SELECT course_id FROM Enrolled where user_id=? AND course_id=?",(thisuser[0],coursefind[0])).fetchone()
-            if verifycourse is None:
-                courses = theCursor.execute("SELECT user_id FROM Enrolled where user_id=?",(thisuser[0],)).fetchall()
-            else:
+            coursefind2 = theCursor.execute("SELECT coursename FROM Course where coursename=?",(request.form.get('coursename1'),)).fetchone()
+            print(coursefind2)
+            if coursefind2 is None:
                 return redirect(url_for('enrolledCourses', user=user))
-            for course in courses:
-                course1 = theCursor.execute("SELECT coursename FROM Course where courseid=?", (course[0],)).fetchone()
-                usercourses = usercourses + (course1,)
-
-            print(usercourses)
-            for i in usercourses:
-                if i[0] is theCursor.execute("SELECT coursename FROM Course where coursename=?", (request.form.get('coursename1'),)).fetchone():
+            else:
+                verifycourse = theCursor.execute("SELECT course_id FROM Enrolled where user_id=? AND course_id=?",(thisuser[0],coursefind[0])).fetchone()
+                if verifycourse is None:
+                    courses = theCursor.execute("SELECT user_id FROM Enrolled where user_id=?",(thisuser[0],)).fetchall()
+                else:
                     return redirect(url_for('enrolledCourses', user=user))
 
-            db_conn.execute('INSERT INTO Enrolled(course_id, user_id) VALUES (?,?);', [coursefind[0], thisuser[0]]);
-            db_conn.commit()
+                for course in courses:
+                    course1 = theCursor.execute("SELECT coursename FROM Course where courseid=?", (course[0],)).fetchone()
+                    usercourses = usercourses + (course1,)
+                print(usercourses)
+                for i in usercourses:
+                    if i[0] is theCursor.execute("SELECT coursename FROM Course where coursename=?", (request.form.get('coursename1'),)).fetchone():
+                            return redirect(url_for('enrolledCourses', user=user))
+
+                db_conn.execute('INSERT INTO Enrolled(course_id, user_id) VALUES (?,?);', [coursefind[0], thisuser[0]]);
+                db_conn.commit()
+
             return redirect(url_for('enrolledCourses', user=user))
 
 @app.route('/<user>/courses/removecourse/<coursename>', methods=['POST', 'GET'])
@@ -270,6 +270,86 @@ def deleteUser(id):
                                     address, studentId, college, course, id FROM User WHERE usertype=?", ('user',)).fetchall()
             return redirect(url_for('manageUsers', users=users))
 
+@app.route('/<user>/manageusers/search/<usertype>', methods=['POST', 'GET'])
+def search(user, usertype):
+    if g.user:
+        if request.method == 'POST':
+            isUsername = theCursor.execute("SELECT username FROM user WHERE username LIKE ?", ('%'+request.form['input']+'%',)).fetchone()
+            isStudentId = theCursor.execute("SELECT studentId FROM User WHERE studentId LIKE ? ", (request.form['input']+'%',)).fetchone()
+            isName= theCursor.execute("SELECT firstname, lastname, middlename FROM User WHERE (firstname LIKE ?) OR lastname LIKE ? OR middlename LIKE ?",\
+                                      ('%'+request.form['input']+'%', '%'+request.form['input']+'%', '%'+request.form['input']+'%',)).fetchone()
+            isEmail = theCursor.execute("SELECT email FROM User WHERE email=?", (request.form['input'],)).fetchone()
+            isCollege = theCursor.execute("SELECT college FROM User WHERE college=?", (request.form['input'],)).fetchone()
+            isCourse = theCursor.execute("SELECT course FROM User WHERE course=?", (request.form['input'],)).fetchone()
+            isAddress = theCursor.execute("SELECT address FROM User WHERE address LIKE ?", ('%'+request.form['input']+'%',)).fetchone()
+            isBirthday = theCursor.execute("SELECT birthdate FROM User WHERE birthdate LIKE ?", (request.form['input']+'%',)).fetchone()
+            if isStudentId is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+                                            address, studentId, college, course, id FROM User WHERE usertype=? AND studentId LIKE ?",('user', request.form['input']+'%',)).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            elif isName is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+                                                    address, studentId, college, course, id FROM User WHERE  firstname LIKE ? OR \
+                                                    lastname LIKE ? OR middlename LIKE ?",('%'+request.form['input']+'%', '%'+request.form['input']+'%', '%'+request.form['input']+'%',)).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            elif isEmail is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND email=?", \
+                                          ('user', request.form['input'],)).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            elif isCollege is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND college=?", \
+                                          ('user', request.form['input'])).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            elif isCourse is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND course=?", \
+                                          ('user', request.form['input'],)).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            elif isAddress is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+                                                    address, studentId, college, course, id FROM User WHERE address LIKE ?", ('%'+request.form['input']+'%',)).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            elif isBirthday is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+                                    address, studentId, college, course, id FROM User WHERE usertype=? AND birthdate LIKE ?", ('user', request.form['input']+'%')).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            elif isUsername is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND username LIKE ?",
+                                          ('user', '%'+request.form['input']+'%')).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            else:
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=())
+                else:
+                    return render_template('adminuserlist.html', users=())
+
 @app.route('/admin/managecourses')
 def managecourses():
     if g.user:
@@ -305,6 +385,8 @@ def editcourse(coursename):
         else:
             course = theCursor.execute("SELECT coursename FROM Course WHERE coursename=?", (coursename,)).fetchone()
             return render_template('admineditcourse.html', course=course)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

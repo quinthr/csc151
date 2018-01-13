@@ -90,7 +90,7 @@ body{
                                     </form>
                             </div>
                             <div class="navbar-search control-group pull-right">
-                                    <form class="navbar-search pull-right" action="{{ url_for('addcourse', coursename=coursename) }}" method="POST">
+                                    <form class="navbar-search pull-right" action="{{ url_for('search', usertype='admin', user='admin') }}" method="POST">
                                          <div class="form-group floating-label-form-group controls pull-left">
                                              <div class="pull-left">
                                                  <input type="text" class="form-control" placeholder="Search">
