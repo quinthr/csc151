@@ -48,6 +48,13 @@ body {
   background-position: center;
   background-size: cover;
 }
+.slide4{
+  background-image: url('../static/img/bkgrnd10.jpg');
+  height: 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
 .carousel-caption h1{
   font-size: 5.4em;
   font-family: 'Pacifico', cursive;
@@ -79,15 +86,16 @@ body {
 
   <!-- Define how many slides to put in the carousel -->
   <ol class="carousel-indicators">
-    <li data-target="#theCarousel" data-slide-to="0" class="active"> </li >
+    <li data-target="#theCarousel" data-slide-to="0"> </li >
     <li data-target="#theCarousel" data-slide-to="1"> </li>
-    <li data-target ="#theCarousel" data-slide-to="2"> </li>
+    <li data-target ="#theCarousel" data-slide-to="2" class="active"> </li>
+    <li data-target ="#theCarousel" data-slide-to="3"></li>
   </ol >
 
   <!-- Define the text to place over the image -->
   <div class="carousel-inner">
-    <div class="item active" >
-    <div class ="slide1"></div>
+    <div class="item" >
+    <div class ="slide4"></div>
     <div class="carousel-caption">
       <h1>Student Management</h1>
       <h2>Join now!</h2>
@@ -96,7 +104,7 @@ body {
     </div>
   </div>
   <div class="item">
-  <div class="slide2"></div>
+  <div class="slide3"></div>
   <div class="carousel-caption">
     <h1>Student Management</h1>
     <h2>Already a member?</h2>
@@ -105,11 +113,22 @@ body {
   </div>
 
   </div>
-  <div class="item">
-  <div class="slide3"></div>
+  <div class="item active">
+  <div class="slide1"></div>
   <div class="carousel-caption">
-  <h1>Manage your students</h1>
-  <p>And it's easy!</p>
+  <h1>Student Management</h1>
+    <h2>Guest Login</h2>
+      <p><a href="{{ url_for('userlogin', user='User')}}" class="btn btn-primary btn-lg">Guest</a></p>
+      <p>Already a member? Click <a href="{{url_for('login')}}">Click here</a></p>
+  </div>
+  </div>
+  <div class="item">
+  <div class="slide2"></div>
+  <div class="carousel-caption">
+  <h1>Student Management</h1>
+    <h2>Admin Login</h2>
+      <p><a href="{{ url_for('adminlogin', user='admin' )}}" class="btn btn-primary btn-lg">Admin</a></p>
+      <p>Already a member? Click <a href="{{url_for('login')}}">Click here</a></p>
   </div>
   </div>
   </div>

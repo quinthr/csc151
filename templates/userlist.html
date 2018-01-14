@@ -86,15 +86,16 @@ margin-top: 8px;
                         <table class="bordered highlight">
                             <thead>
                                 <tr>
-                                    <th colspan="1">Username</th>
-                                    <th colspan="1">User Email</th>
-                                    <th colspan="3">Full Name</th>
-                                    <th colspan="1">Sex</th>
-                                    <th colspan="1">Birthdate</th>
-                                    <th colspan="1">Address</th>
-                                    <th colspan="1">Student ID</th>
-                                    <th colspan="1">College</th>
-                                    <th colspan="1">Course</th>
+                                    <th colspan="1">Username<a href="{{url_for('sort', user=user, column='username')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="1">User Email<a href="{{url_for('sort', user=user, column='email')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="3">Full Name<a href="{{url_for('sort', user=user, column='firstname')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="1">Sex<a href="{{url_for('sort', user=user, column='sex')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="1">Birthdate<a href="{{url_for('sort', user=user, column='birthdate')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="1">Age<a href="{{url_for('sort', user=user, column='age')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="1">Address<a href="{{url_for('sort', user=user, column='address')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="1">Student ID<a href="{{url_for('sort', user=user, column='studentId')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="1">College<a href="{{url_for('sort', user=user, column='college')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
+                                    <th colspan="1">Course<a href="{{url_for('sort', user=user, column='course')}}"><span class="glyphicon glyphicon-sort"></span></a></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -109,6 +110,8 @@ margin-top: 8px;
                                     <td colspan="1">{{user[8]}}</td>
                                     <td colspan="1">{{user[9]}}</td>
                                     <td colspan="1">{{user[10]}}</td>
+                                    <td colspan="1">{{user[11]}}</td>
+
                                 </tr>
                                 {% endfor %}
                             </tbody>

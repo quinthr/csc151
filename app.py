@@ -18,13 +18,14 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+
 db_conn.execute("""CREATE TABLE IF NOT EXISTS Admin(adminid INTEGER PRIMARY KEY AUTOINCREMENT, 
                 username STRING(50) NOT NULL,  password STRING(50) NOT NULL);""")
 
 db_conn.execute("""CREATE TABLE IF NOT EXISTS User(id INTEGER PRIMARY KEY AUTOINCREMENT, usertype STRING(20) NOT NULL,
                 username VARCHAR(50) NOT NULL UNIQUE,  email VARCHAR(50) NOT NULL UNIQUE, 
                 password VARCHAR(50) NOT NULL, firstname NOT NULL, lastname NOT NULL, 
-                middlename NOT NULL, sex STRING(10) NOT NULL, birthdate TEXT NOT NULL,
+                middlename NOT NULL, sex STRING(10) NOT NULL, birthdate TEXT NOT NULL, age INTEGER NOT NULL,
                 studentId INT(10) NOT NULL UNIQUE, college STRING(30) NOT NULL, course STRING(10) NOT NULL,
                 address STRING(50) NOT NULL);""")
 
@@ -36,7 +37,6 @@ db_conn.execute("""CREATE TABLE IF NOT EXISTS Enrolled(enrollmentid INTEGER PRIM
                    FOREIGN KEY(course_id) REFERENCES Course(courseid) );""")
 
 db_conn.commit()
-
 
 
 
@@ -54,8 +54,8 @@ def main():
     if check is None or user is None:
         db_conn.execute('INSERT INTO Admin(username, password) VALUES (?,?);', ['admin', 'adminpass']);
         db_conn.execute('INSERT INTO User(usertype, username, email, password, firstname, lastname, middlename, \
-                        sex, birthdate, studentId, college, course, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', \
-                        ['admin', 'admin', 'admin@gmail.com', 'adminpass', 'admin', 'admin', 'admin', 'Male', 'admin', 'admin', \
+                        sex, birthdate, age, studentId, college, course, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', \
+                        ['admin', 'admin', 'admin@gmail.com', 'adminpass', 'admin', 'admin', 'admin', 'Male', 'admin', 20, 'admin', \
                          'admin', 'admin', 'admin']);
 
         db_conn.commit()
@@ -66,6 +66,11 @@ def before_request():
     g.user = None
     if 'user' in session:
         g.user = session['user']
+
+def getAge(date):
+    age = db_conn.execute("SELECT (strftime('%Y', 'now') - strftime('%Y', ?)) - (strftime('%m-%d', 'now')<strftime('%m-%d', ?))", (date, date,)).fetchone()
+    print(age[0])
+    return age[0]
 
 @app.route('/login', methods = ['POST', 'GET'])
 def login():
@@ -92,6 +97,37 @@ def login():
                 return redirect('/login')
     return render_template('login.html')
 
+@app.route('/<user>', methods=['POST', 'GET'])
+def userdashboard(user):
+    if g.user:
+        return render_template('userdashboard.html', user = user)
+
+@app.route('/admin')
+def admindashboard():
+    if g.user:
+        return render_template('admindashboard.html')
+
+@app.route('/login/<user>', methods=['POST','GET'])
+def userlogin(user):
+    if request.method == 'POST':
+        session.pop('user', None)
+    else:
+        user = theCursor.execute("SELECT * FROM User WHERE username=? AND password=?", ('User', 'asdf')).fetchone()
+        username = theCursor.execute("SELECT username FROM User WHERE username=?", ('User',)).fetchone()
+        session['user'] = 'User'
+        return redirect(url_for('.userdashboard', user=username[0]))
+
+@app.route('/login/admin', methods=['POST', 'GET'])
+def adminlogin():
+    if request.method == 'POST':
+        session.pop('user', None)
+    else:
+        user = theCursor.execute("SELECT * FROM User WHERE username=?", ('admin',)).fetchone()
+        username = theCursor.execute("SELECT username FROM User WHERE username=?", ('admin',)).fetchone()
+        session['user'] = 'admin'
+        g.user = session['user']
+        return redirect(url_for('.admindashboard'))
+
 
 @app.route('/logout', methods=['POST', 'GET'])
 def logout():
@@ -104,10 +140,13 @@ def signup():
     if request.method == 'POST':
         if request.form['password'] == request.form['password2']:
             birth_date = request.form['birthdate']
+            print(birth_date)
+            age = getAge(birth_date)
+            print(age)
             db_conn.execute('INSERT INTO User(usertype, username, email, password, firstname, lastname, middlename, \
-                            sex, birthdate, studentId, college, course, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', \
+                            sex, birthdate, age, studentId, college, course, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', \
                             ['user', request.form['username'], request.form['email'], request.form['password'], request.form['firstname'], request.form['lastname'], \
-                             request.form['middlename'], request.form.get('sex'), (request.form['birthdate']), request.form['studentId'], \
+                             request.form['middlename'], request.form.get('sex'), (request.form['birthdate']), int(age), request.form['studentId'], \
                              request.form.get('college'), request.form['course'], request.form['address']]);
             db_conn.commit()
             user = theCursor.execute("SELECT * FROM User WHERE username=?  AND password=?", (request.form['username'],request.form['password'],)).fetchone()
@@ -119,15 +158,12 @@ def signup():
     else:
         return render_template('signup.html')
 
-@app.route('/<user>', methods=['POST', 'GET'])
-def userdashboard(user):
-    if g.user:
-        return render_template('userdashboard.html', user = user)
+
 
 @app.route('/<user>/profile', methods=['POST', 'GET'])
 def profile(user):
     if g.user:
-        thisuser = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+        thisuser = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
                             address, studentId, college, course, id FROM User WHERE username=?", (user,)).fetchone()
 
         return render_template('profile.html', user=user, mainuser=thisuser)
@@ -143,28 +179,28 @@ def editinfo(user):
             db_conn.execute('UPDATE User SET lastname = ? WHERE id = ?', (request.form['lastname'], userid[0]))
             db_conn.execute('UPDATE User SET middlename = ? WHERE id = ?', (request.form['middlename'], userid[0]))
             db_conn.execute('UPDATE User SET birthdate = ? WHERE id = ?', (request.form['birthdate'], userid[0]))
+            db_conn.execute('UPDATE User SET age = ? WHERE id = ?', (getAge(request.form['birthdate']), userid[0]))
             db_conn.execute('UPDATE User SET studentId = ? WHERE id = ?', (request.form['studentId'], userid[0]))
             db_conn.execute('UPDATE User SET college = ? WHERE id = ?', (request.form['college'], userid[0]))
             db_conn.execute('UPDATE User SET course = ? WHERE id = ?', (request.form['course'], userid[0]))
             db_conn.execute('UPDATE User SET address = ? WHERE id = ?', (request.form['address'], userid[0]))
             db_conn.commit()
-            thisuser = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
+            thisuser = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
                                 address, studentId, college, course, id FROM User WHERE username=?",(request.form['username'],)).fetchone()
             usernew = theCursor.execute("SELECT username FROM User WHERE username=?", (request.form['username'],)).fetchone()
 
             return redirect(url_for('profile', user=usernew[0], mainuser=thisuser))
         else:
-            thisuser = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                            address, studentId, college, course, id FROM User WHERE username=?",
-                                         (user,)).fetchone()
+            thisuser = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                            address, studentId, college, course, id FROM User WHERE username=?", (user,)).fetchone()
             return render_template('editInfo.html', user=user, mainuser=thisuser)
 
 
 @app.route('/<user>/userlist', methods=['POST', 'GET'])
 def userlist(user):
     if g.user:
-        users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                    address, studentId, college, course, id FROM User WHERE usertype=?",
+        users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY studentId",
                                   ('user',)).fetchall()
         return render_template('userlist.html', users=users, user=user)
 
@@ -204,7 +240,7 @@ def userAddcourse(user):
                     usercourses = usercourses + (course1,)
                 print(usercourses)
                 for i in usercourses:
-                    if i[0] is theCursor.execute("SELECT coursename FROM Course where coursename=?", (request.form.get('coursename1'),)).fetchone():
+                    if i is theCursor.execute("SELECT coursename FROM Course where coursename=?", (request.form.get('coursename1'),)).fetchone():
                             return redirect(url_for('enrolledCourses', user=user))
 
                 db_conn.execute('INSERT INTO Enrolled(course_id, user_id) VALUES (?,?);', [coursefind[0], thisuser[0]]);
@@ -223,16 +259,13 @@ def userRemovecourse(user, coursename):
             return redirect(url_for('enrolledCourses', user=user))
 
 
-@app.route('/admin')
-def admindashboard():
-    if g.user:
-        return render_template('admindashboard.html')
+
 
 @app.route('/admin/manageusers', methods=['POST', 'GET'])
 def manageUsers():
     if g.user:
-        users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                            address, studentId, college, course, id FROM User WHERE usertype=?", ('user',)).fetchall()
+        users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                            address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY username", ('user',)).fetchall()
         return render_template('adminuserlist.html', users=users)
 
 @app.route('/admin/manageusers/adduser', methods=['POST','GET'])
@@ -241,20 +274,20 @@ def addUser():
         if request.method == 'POST':
             if request.form['password'] == request.form['password2']:
                 db_conn.execute('INSERT INTO User(usertype, username, email, password, firstname, lastname, middlename, \
-                                sex, birthdate, studentId, college, course, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', \
+                                sex, birthdate, age, studentId, college, course, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);', \
                                 ['user', request.form['username'], request.form['email'], request.form['password'],
                                  request.form['firstname'], request.form['lastname'], \
-                                 request.form['middlename'], request.form.get('sex'), request.form['birthdate'],
+                                 request.form['middlename'], request.form.get('sex'), request.form['birthdate'], getAge(request.form['birthdate']),
                                  request.form['studentId'], \
                                  request.form.get('college'), request.form['course'], request.form['address']]);
                 db_conn.commit()
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                                    address, studentId, college, course, id FROM User WHERE usertype=?",
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY username",
                                           ('user',)).fetchall()
                 return redirect(url_for('manageUsers', users=users))
             else:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                    address, studentId, college, course, id FROM User WHERE usertype=?",
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY username",
                                           ('user',)).fetchall()
                 return redirect(url_for('manageUsers', users=users))
         else:
@@ -266,79 +299,102 @@ def deleteUser(id):
         if request.method == 'POST':
             db_conn.execute("DELETE FROM User WHERE id=?", (id,)).fetchone()
             db_conn.commit()
-            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                    address, studentId, college, course, id FROM User WHERE usertype=?", ('user',)).fetchall()
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY username", ('user',)).fetchall()
             return redirect(url_for('manageUsers', users=users))
 
-@app.route('/<user>/manageusers/search/<usertype>', methods=['POST', 'GET'])
+@app.route('/<user>/userlist/search/<usertype>', methods=['POST', 'GET'])
 def search(user, usertype):
     if g.user:
         if request.method == 'POST':
             isUsername = theCursor.execute("SELECT username FROM user WHERE username LIKE ?", ('%'+request.form['input']+'%',)).fetchone()
-            isStudentId = theCursor.execute("SELECT studentId FROM User WHERE studentId LIKE ? ", (request.form['input']+'%',)).fetchone()
+            isStudentId = theCursor.execute("SELECT studentId FROM User WHERE studentId LIKE ? AND studentId LIKE ? ", (request.form['input']+'%', '20_%_%')).fetchone()
             isName= theCursor.execute("SELECT firstname, lastname, middlename FROM User WHERE (firstname LIKE ?) OR lastname LIKE ? OR middlename LIKE ?",\
                                       ('%'+request.form['input']+'%', '%'+request.form['input']+'%', '%'+request.form['input']+'%',)).fetchone()
             isEmail = theCursor.execute("SELECT email FROM User WHERE email=?", (request.form['input'],)).fetchone()
             isCollege = theCursor.execute("SELECT college FROM User WHERE college=?", (request.form['input'],)).fetchone()
+            isSex = theCursor.execute("SELECT sex FROM User WHERE sex=?", (request.form['input'],)).fetchone()
             isCourse = theCursor.execute("SELECT course FROM User WHERE course=?", (request.form['input'],)).fetchone()
             isAddress = theCursor.execute("SELECT address FROM User WHERE address LIKE ?", ('%'+request.form['input']+'%',)).fetchone()
-            isBirthday = theCursor.execute("SELECT birthdate FROM User WHERE birthdate LIKE ?", (request.form['input']+'%',)).fetchone()
+            isBirthday = theCursor.execute("SELECT birthdate FROM User WHERE birthdate LIKE ? AND (birthdate LIKE ? OR birthdate LIKE ?)", (request.form['input']+'%', '19_%_%', '200_%')).fetchone()
+            isAge = theCursor.execute("SELECT age FROM User where age=?", (request.form['input'],)).fetchone()
+            print(request.form['input'])
             if isStudentId is not None:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                            address, studentId, college, course, id FROM User WHERE usertype=? AND studentId LIKE ?",('user', request.form['input']+'%',)).fetchall()
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                            address, studentId, college, course, id FROM User WHERE usertype=? AND studentId LIKE ? AND studentId LIKE ? ORDER BY username",\
+                                          ('user', request.form['input']+'%', '20_%_%')).fetchall()
                 if usertype == 'user':
                     return render_template('userlist.html', user=user, users=users)
                 else:
                     return render_template('adminuserlist.html', users=users)
             elif isName is not None:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                    address, studentId, college, course, id FROM User WHERE  firstname LIKE ? OR \
-                                                    lastname LIKE ? OR middlename LIKE ?",('%'+request.form['input']+'%', '%'+request.form['input']+'%', '%'+request.form['input']+'%',)).fetchall()
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND firstname LIKE ? OR \
+                                                    lastname LIKE ? OR middlename LIKE ? ORDER BY username",('user','%'+request.form['input']+'%', '%'+request.form['input']+'%', '%'+request.form['input']+'%',)).fetchall()
                 if usertype == 'user':
                     return render_template('userlist.html', user=user, users=users)
                 else:
                     return render_template('adminuserlist.html', users=users)
             elif isEmail is not None:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND email=?", \
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND email=? ORDER BY username", \
                                           ('user', request.form['input'],)).fetchall()
                 if usertype == 'user':
                     return render_template('userlist.html', user=user, users=users)
                 else:
                     return render_template('adminuserlist.html', users=users)
             elif isCollege is not None:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND college=?", \
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND college=? ORDER BY username", \
+                                          ('user', request.form['input'])).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+            elif isSex is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND sex=? ORDER BY username", \
                                           ('user', request.form['input'])).fetchall()
                 if usertype == 'user':
                     return render_template('userlist.html', user=user, users=users)
                 else:
                     return render_template('adminuserlist.html', users=users)
             elif isCourse is not None:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND course=?", \
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND course=? ORDER BY username", \
                                           ('user', request.form['input'],)).fetchall()
                 if usertype == 'user':
                     return render_template('userlist.html', user=user, users=users)
                 else:
                     return render_template('adminuserlist.html', users=users)
             elif isAddress is not None:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                    address, studentId, college, course, id FROM User WHERE address LIKE ?", ('%'+request.form['input']+'%',)).fetchall()
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND address LIKE ? ORDER BY username", ('user', '%'+request.form['input']+'%',)).fetchall()
                 if usertype == 'user':
                     return render_template('userlist.html', user=user, users=users)
                 else:
                     return render_template('adminuserlist.html', users=users)
+
+            elif isAge is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND age= ? ORDER BY username",
+                                          ('user', request.form['input'])).fetchall()
+                if usertype == 'user':
+                    return render_template('userlist.html', user=user, users=users)
+                else:
+                    return render_template('adminuserlist.html', users=users)
+
             elif isBirthday is not None:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                    address, studentId, college, course, id FROM User WHERE usertype=? AND birthdate LIKE ?", ('user', request.form['input']+'%')).fetchall()
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                    address, studentId, college, course, id FROM User WHERE usertype=? AND birthdate LIKE ? AND (birthdate LIKE ? OR birthdate LIKE ?) ORDER BY username", \
+                                          ('user', request.form['input']+'%', '19_%_%', '200_%')).fetchall()
                 if usertype == 'user':
                     return render_template('userlist.html', user=user, users=users)
                 else:
                     return render_template('adminuserlist.html', users=users)
             elif isUsername is not None:
-                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, \
-                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND username LIKE ?",
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND username LIKE ? ORDER BY username",
                                           ('user', '%'+request.form['input']+'%')).fetchall()
                 if usertype == 'user':
                     return render_template('userlist.html', user=user, users=users)
@@ -349,6 +405,186 @@ def search(user, usertype):
                     return render_template('userlist.html', user=user, users=())
                 else:
                     return render_template('adminuserlist.html', users=())
+
+@app.route('/admin/manageusers/search', methods=['POST', 'GET'])
+def searchA():
+    if g.user:
+        if request.method == 'POST':
+            isUsername = theCursor.execute("SELECT username FROM user WHERE username LIKE ?", ('%'+request.form['input']+'%',)).fetchone()
+            isStudentId = theCursor.execute("SELECT studentId FROM User WHERE studentId LIKE ? AND studentId LIKE ? ", (request.form['input']+'%', '20_%_%')).fetchone()
+            isName= theCursor.execute("SELECT firstname, lastname, middlename FROM User WHERE (firstname LIKE ?) OR lastname LIKE ? OR middlename LIKE ?",\
+                                      ('%'+request.form['input']+'%', '%'+request.form['input']+'%', '%'+request.form['input']+'%',)).fetchone()
+            isEmail = theCursor.execute("SELECT email FROM User WHERE email=?", (request.form['input'],)).fetchone()
+            isCollege = theCursor.execute("SELECT college FROM User WHERE college=?", (request.form['input'],)).fetchone()
+            isSex = theCursor.execute("SELECT sex FROM User WHERE sex=?", (request.form['input'],)).fetchone()
+            isCourse = theCursor.execute("SELECT course FROM User WHERE course=?", (request.form['input'],)).fetchone()
+            isAddress = theCursor.execute("SELECT address FROM User WHERE address LIKE ?", ('%'+request.form['input']+'%',)).fetchone()
+            isBirthday = theCursor.execute("SELECT birthdate FROM User WHERE birthdate LIKE ? AND (birthdate LIKE ? OR birthdate LIKE ?)", (request.form['input']+'%', '19_%_%', '200_%')).fetchone()
+            isAge = theCursor.execute("SELECT age FROM User where age=?", (request.form['input'],)).fetchone()
+            print(request.form['input'])
+            if isStudentId is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                            address, studentId, college, course, id FROM User WHERE usertype=? AND studentId LIKE ? AND studentId LIKE ? ORDER BY username",\
+                                          ('user', request.form['input']+'%', '20_%_%')).fetchall()
+                return render_template('adminuserlist.html', users=users)
+            elif isName is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND firstname LIKE ? OR \
+                                                    lastname LIKE ? OR middlename LIKE ? ORDER BY username",('user','%'+request.form['input']+'%', '%'+request.form['input']+'%', '%'+request.form['input']+'%',)).fetchall()
+                return render_template('adminuserlist.html', users=users)
+            elif isEmail is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND email=? ORDER BY username", \
+                                          ('user', request.form['input'],)).fetchall()
+                return render_template('adminuserlist.html', users=users)
+            elif isCollege is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND college=? ORDER BY username", \
+                                          ('user', request.form['input'])).fetchall()
+                return render_template('adminuserlist.html', users=users)
+            elif isSex is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND sex=? ORDER BY username", \
+                                          ('user', request.form['input'])).fetchall()
+                return render_template('adminuserlist.html', users=users)
+            elif isCourse is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND course=? ORDER BY username", \
+                                          ('user', request.form['input'],)).fetchall()
+                return render_template('adminuserlist.html', users=users)
+            elif isAddress is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND address LIKE ? ORDER BY username", ('user', '%'+request.form['input']+'%',)).fetchall()
+                return render_template('adminuserlist.html', users=users)
+
+            elif isAge is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND age= ? ORDER BY username",
+                                          ('user', request.form['input'])).fetchall()
+                return render_template('adminuserlist.html', users=users)
+
+            elif isBirthday is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                    address, studentId, college, course, id FROM User WHERE usertype=? AND birthdate LIKE ? AND (birthdate LIKE ? OR birthdate LIKE ?) ORDER BY username", \
+                                          ('user', request.form['input']+'%', '19_%_%', '200_%')).fetchall()
+                return render_template('adminuserlist.html', users=users)
+            elif isUsername is not None:
+                users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? AND username LIKE ? ORDER BY username",
+                                          ('user', '%'+request.form['input']+'%')).fetchall()
+                return render_template('adminuserlist.html', users=users)
+            else:
+                return render_template('adminuserlist.html', users=())
+
+@app.route('/<user>/manageusers/sort/<column>', methods=['POST','GET'])
+def sort(user, column):
+    if g.user:
+        if column == 'username':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY username",('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'email':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY email", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'firstname':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY firstname", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'sex':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY sex, username", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'birthdate':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY birthdate, username", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'age':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY age, username", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'address':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY address, username ", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'studentId':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY studentId", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'college':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY college, username", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        elif column == 'course':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY course, username", \
+                                      ('user',)).fetchall()
+            return render_template('userlist.html', user=user, users=users)
+        else:
+            return render_template('userlist.html', user=user, users=())
+
+@app.route('/admin/manageusers/sort/<column>', methods=['POST','GET'])
+def sortA(column):
+    if g.user:
+        if column == 'username':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY username",('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'email':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY email", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'firstname':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY firstname", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'sex':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY sex, username", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'birthdate':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY birthdate, username", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'age':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY age, username", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'address':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY address, username ", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'studentId':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY studentId", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'college':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY college, username", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        elif column == 'course':
+            users = theCursor.execute("SELECT username, email, firstname, middlename, lastname, sex, birthdate, age, \
+                                                    address, studentId, college, course, id FROM User WHERE usertype=? ORDER BY course, username", \
+                                      ('user',)).fetchall()
+            return render_template('adminuserlist.html', users=users)
+        else:
+            return render_template('adminuserlist.html', users=())
 
 @app.route('/admin/managecourses')
 def managecourses():

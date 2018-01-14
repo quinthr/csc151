@@ -54,7 +54,7 @@ body{
     <li class="active"><a href="{{ url_for('userdashboard', user=user) }}"><i class="material-icons blue-text text-darken-1">dashboard</i>Dashboard</a></li>
   <li><div class="divider"></div></li>
   <li><a href="{{url_for('enrolledCourses', user=user)}}"><i class="material-icons">school</i>My Courses</a></li>
-    <li><a href="#"><i class="material-icons">person</i>Users</a></li>
+    <li><a href="{{url_for('userlist', user=user)}}"><i class="material-icons">person</i>Users</a></li>
 </ul>
 
 <div class="main">
@@ -89,28 +89,30 @@ body{
                          <input type="text" class="form-control"  value="{{ mainuser[6] }}" name=birthdate id=birthdate>
                          <br />
                          <h4>Stundent ID</h4>
-                         <input type="text" class="form-control"  value="{{ mainuser[8] }}" name=studentId id=studentId>
+                         <input type="text" class="form-control"  value="{{ mainuser[9] }}" name=studentId id=studentId>
                          <br />
 
                          <br />
                          <h4>Course</h4>
-                         <input type="text" class="form-control"  value="{{ mainuser[10] }}" name=course id=course>
+                         <input type="text" class="form-control"  value="{{ mainuser[11] }}" name=course id=course>
                          <br />
                          <h4>Address</h4>
-                         <input type="text" class="form-control"  value="{{ mainuser[7] }}" name=address id=address>
+                         <input type="text" class="form-control"  value="{{ mainuser[8] }}" name=address id=address>
                          <br />
                          <div class="field-wrap" style="margin-bottom: 2%;">
                               <label for="college" style="color:black; margin-bottom: 2%;" class="pull-left collegename">
                                       <h4>College<span class="req"></span></h4>
                               </label>
                                   <select style="margin-bottom: 2%;" class="form-control pull-right" id="college" name=college>
-                                    <option value="{{mainuser[9]}}" selected>{{mainuser[9]}}</option>
+                                    <option value="{{mainuser[10]}}" selected>{{mainuser[10]}}</option>
+                                      <option value="CASS">CASS</option>
                                       <option value="CBAA">CBAA</option>
                                       <option value="CED">CED</option>
                                       <option value="COET">COET</option>
                                       <option value="CON">CON</option>
                                       <option value="CSM">CSM</option>
                                       <option value="SCS">SCS</option>
+
                                   </select>
                           </div>
                      </div>

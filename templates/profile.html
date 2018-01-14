@@ -50,7 +50,7 @@ body{
     <li class="active"><a href="{{ url_for('userdashboard', user=user) }}"><i class="material-icons blue-text text-darken-1">dashboard</i>Dashboard</a></li>
   <li><div class="divider"></div></li>
   <li><a href="{{url_for('enrolledCourses', user=user)}}"><i class="material-icons">school</i>My Courses</a></li>
-    <li><a href="#"><i class="material-icons">person</i>Users</a></li>
+    <li><a href="{{url_for('userlist', user=user)}}"><i class="material-icons">person</i>Users</a></li>
 </ul>
 
 <div class="main">
@@ -74,10 +74,11 @@ body{
             <h6 style="margin-bottom:1.5%;">Full name: {{mainuser[2]}} {{mainuser[3]}} {{mainuser[4]}}</h6>
             <h6 style="margin-bottom:1.5%;">Birthday: {{mainuser[6]}}</h6>
             <h6 style="margin-bottom:1.5%;">Sex: {{mainuser[5]}}</h6>
-            <h6 style="margin-bottom:1.5%;">Address: {{mainuser[7]}}</h6>
-            <h6 style="margin-bottom:1.5%;">Student ID No: {{mainuser[8]}}</h6>
-            <h6 style="margin-bottom:1.5%;">College: {{mainuser[9]}}</h6>
-            <h6 style="margin-bottom:1.5%;">Course: {{mainuser[10]}}</h6>
+            <h6 style="margin-bottom:1.5%;">Age: {{mainuser[7]}}</h6>
+            <h6 style="margin-bottom:1.5%;">Address: {{mainuser[8]}}</h6>
+            <h6 style="margin-bottom:1.5%;">Student ID No: {{mainuser[9]}}</h6>
+            <h6 style="margin-bottom:1.5%;">College: {{mainuser[10]}}</h6>
+            <h6 style="margin-bottom:1.5%;">Course: {{mainuser[11]}}</h6>
             </p>
         </div>
     </div>
